@@ -1,0 +1,59 @@
+<!-- Front Template - with Unified Audio Button -->
+
+<div id="card" class="front">
+    <div class="card__section video-container">
+        {{#SentenceVideo}}
+        <video
+            id="video_front"
+            class="video-player"
+            src='{{SentenceVideo}}'
+            controls
+            playsinline
+            autoplay
+            preload="auto">
+            <!-- preload="metadata"> -->
+            <!-- muted -->
+            <!-- loop -->
+        </video>
+        {{/SentenceVideo}}
+    </div>
+
+    <div class="card__section sentence-container">
+        <!-- *** NEW STRUCTURE: A Flexbox container for button and sentence *** -->
+        <div class="sentence-with-audio">
+            {{#SentenceAudio}}
+            <button id="play_sentence_audio_btn_front" class="audio-button sentence-audio-button" title="Play sentence audio">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>
+            </button>
+            {{/SentenceAudio}}
+            <div class="sentence" id="sentence_front">
+                {{Sentence}}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    setTimeout(function() {
+
+
+        // --- 2. Video Interaction ---
+        const frontVideo = document.getElementById('video_front');
+        if (frontVideo) {
+            frontVideo.addEventListener('click', function(event) {
+                if (event.target === frontVideo) { if (frontVideo.paused) { frontVideo.play(); } else { frontVideo.pause(); } }
+            });
+        }
+
+        // --- 3. (NEW) Sentence Audio Interaction ---
+        const sentenceAudioBtnFront = document.getElementById('play_sentence_audio_btn_front');
+        const sentenceAudioFilename = "{{SentenceAudio}}";
+        if (sentenceAudioBtnFront && sentenceAudioFilename) {
+            sentenceAudioBtnFront.addEventListener('click', function() {
+                const audio = new Audio(sentenceAudioFilename);
+                audio.play();
+            });
+        }
+    }, 0);
+</script>

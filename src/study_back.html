@@ -1,0 +1,235 @@
+<!-- Back Template - Step 2: HTML Skeleton for Ladder Layout -->
+
+<div id="card" class="back">
+    <!-- 1. 视频容器 -->
+    <div class="card__section video-container">
+        {{#SentenceVideo}}
+        <video
+            id="video_back"
+            class="video-player"
+            src='{{SentenceVideo}}'
+            controls
+            playsinline
+            autoplay
+            preload="auto">
+            <!-- preload="metadata"> -->
+            <!-- muted -->
+            <!-- loop -->
+        </video>
+        {{/SentenceVideo}}
+    </div>
+
+    <!-- 2. 句子容器 -->
+    <div class="card__section sentence-container">
+        <div class="sentence-with-audio">
+            {{#SentenceAudio}}
+            <button id="play_sentence_audio_btn_back" class="audio-button sentence-audio-button" title="Play sentence audio">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>
+            </button>
+            {{/SentenceAudio}}
+            <!-- 这里显示带假名的句子 -->
+            <div class="sentence">{{furigana:SentenceReading}}</div>
+        </div>
+
+        {{#SentenceMeaning}}
+        <div class="sentence-meaning">{{SentenceMeaning}}</div>
+        {{/SentenceMeaning}}
+
+        <!-- [新增] Note 显示区域 -->
+        {{#Note}}
+        <div class="sentence-note">💡 {{Note}}</div>
+        {{/Note}}
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- 3. 单词详情容器 -->
+    <div class="card__section expression-details">
+
+        <!-- 顶部：单词 + 音频 + 声调 + [现在标签也放在这里了] -->
+        <div class="expression-header-ladder">
+            <div class="ladder-item ladder-item__expression">
+                <h1 class="expression-main">{{Expression}}</h1>
+                {{#ExpressionAudio}}
+                <button id="play_expression_audio_btn" class="audio-button" title="Play word audio">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>
+                </button>
+                {{/ExpressionAudio}}
+            </div>
+            <!-- 2. 声调行 -->
+            <div class="ladder-item ladder-item__pitch">
+                <div id="pitch-accent-svg-container"></div>
+            </div>
+            <!-- 3. [搬家到了这里] 标签行 -->
+            <div class="meta-top-right">
+                <!-- 频率放在最前面，显眼 -->
+                {{#Frequency}}
+                <span class="meta-badge freq-badge">Freq: {{Frequency}}</span>
+                {{/Frequency}}
+
+                <!-- 标签容器 -->
+                <div id="tag-display-area" class="tags-group"></div>
+                <div id="tag-container" style="display:none;">{{Tags}}</div>
+            </div>
+        </div>
+
+        <!-- 释义容器 (包含内容 ) -->
+        <div class="meaning-wrapper">
+            <!-- 释义内容 -->
+            <div class="meaning-content">
+                {{MeaningHTML}}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- The script remains the same for now, but will be completely replaced in Step 3 -->
+<script>
+    setTimeout(function() {
+        // --- Video Interaction (unchanged) ---
+        const backVideo = document.querySelector('#card.back .video-player');
+        if (backVideo) {
+            backVideo.addEventListener('click', function(event) {
+                if (event.target === backVideo) { if (backVideo.paused) { backVideo.play(); } else { backVideo.pause(); } }
+            });
+        }
+
+        // --- Expression Audio (unchanged) ---
+        const expressionAudioBtn = document.getElementById('play_expression_audio_btn');
+        const audioFilename = "{{ExpressionAudio}}";
+        if (expressionAudioBtn && audioFilename) {
+            expressionAudioBtn.addEventListener('click', function() {
+                const audio = new Audio(audioFilename);
+                audio.play();
+            });
+        }
+
+        // --- Pitch Accent SVG Generator (Patched Version) ---
+        function generatePitchAccentSVG() {
+            const container = document.getElementById('pitch-accent-svg-container');
+            const kana = "{{Reading}}";
+            const pitchData = "{{PitchAccent}}";
+
+            if (!container || !kana || pitchData === "") return;
+
+            const pitchPositions = pitchData.match(/\d+/g);
+            if (!pitchPositions) return;
+
+            const groupMoras = (k) => { let morae = []; const smallKana = "ゃゅょぁぃぅぇぉゎ"; for (let i = 0; i < k.length; i++) { if (i + 1 < k.length && smallKana.includes(k[i+1])) { morae.push(k[i] + k[i+1]); i++; } else { morae.push(k[i]); } } return morae; };
+            const getPattern = (pitchPos, morae) => { const len = morae.length; let pattern = []; if (pitchPos == 0) { for (let i = 0; i < len; i++) pattern.push(i === 0 ? 'L' : 'H'); } else if (pitchPos == 1) { for (let i = 0; i < len; i++) pattern.push(i === 0 ? 'H' : 'L'); } else { for (let i = 0; i < len; i++) pattern.push(i > 0 && i < pitchPos ? 'H' : 'L'); } return pattern; };
+
+            const morae = groupMoras(kana);
+            const pattern = getPattern(parseInt(pitchPositions[0], 10), morae);
+
+            // --- SVG Generation Logic (with patch) ---
+
+            // *** PATCH STARTS HERE ***
+            let fontSize = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--font-size-l'));
+            // Add a fallback: if reading CSS variable fails, use a reasonable default.
+            if (isNaN(fontSize) || fontSize <= 0) {
+                fontSize = 28; // A sensible default size in pixels
+            }
+            // *** PATCH ENDS HERE ***
+
+            // [优化版] 基础宽度系数
+            const baseMoraWidth = fontSize * 1.2;
+
+            // 计算总宽度：如果是拗音(长度>1)，给它更多空间
+            let totalWidth = 0;
+            let moraPositions = [];
+
+            for (let i = 0; i < morae.length; i++) {
+                // 如果这个音包含2个字符(如きゃ)，给它 1.8倍宽度，否则给 1.2倍
+                const currentWidth = (morae[i].length > 1) ? (fontSize * 1.8) : baseMoraWidth;
+                // 记录这个音的中心点位置 (X坐标)
+                moraPositions.push(totalWidth + currentWidth / 2);
+                totalWidth += currentWidth;
+            }
+
+            const width = totalWidth; // 使用累加的总宽度
+            const highY = fontSize * 0.5;
+            const lowY = fontSize * 1.0;
+            const strokeWidth = 2.5;
+            const dotRadius = strokeWidth * 1.5;
+            const height = fontSize * 2.5;
+
+            // Check for invalid dimensions before rendering
+            if (isNaN(width) || width <= 0 || isNaN(height) || height <= 0) {
+                console.error("Invalid SVG dimensions calculated.");
+                return;
+            }
+
+            let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" style="overflow: visible;">`;
+
+            // 1. Add Kana Text (使用计算好的位置)
+            for (let i = 0; i < morae.length; i++) {
+                // 使用 moraPositions[i] 作为 x 坐标
+                svg += `<text x="${moraPositions[i]}" y="${height - fontSize * 0.1}" font-size="${fontSize}px" font-family="var(--font-reading)" fill="var(--c-text)" text-anchor="middle">${morae[i]}</text>`;
+            }
+
+            // 2. Build Path and Dots (使用计算好的位置)
+            let points = [];
+            for (let i = 0; i < morae.length; i++) {
+                const x = moraPositions[i]; // 使用新坐标
+                const y = pattern[i] === 'H' ? highY : lowY;
+                points.push({x, y});
+            }
+
+            let pathData = `M ${points[0].x} ${points[0].y}`;
+            for (let i = 0; i < points.length - 1; i++) {
+                const x_mid = (points[i].x + points[i+1].x) / 2;
+                const y_mid = (points[i].y + points[i+1].y) / 2;
+                const cp_x1 = (x_mid + points[i].x) / 2;
+                const cp_x2 = (x_mid + points[i+1].x) / 2;
+                pathData += ` Q ${cp_x1} ${points[i].y}, ${x_mid} ${y_mid}`;
+                pathData += ` Q ${cp_x2} ${points[i+1].y}, ${points[i+1].x} ${points[i+1].y}`;
+            }
+
+            let dots = "";
+            for (let i = 0; i < pattern.length - 1; i++) {
+                if (pattern[i] === 'H' && pattern[i+1] === 'L') {
+                    dots += `<circle cx="${points[i+1].x}" cy="${points[i+1].y}" r="${dotRadius}" fill="var(--c-pitch-line)" />`;
+                }
+            }
+
+            svg += `<path d="${pathData}" stroke="var(--c-pitch-line)" stroke-width="${strokeWidth}" fill="none" stroke-linecap="round" stroke-linejoin="round" />`;
+            svg += dots;
+            svg += `</svg>`;
+
+            container.innerHTML = svg;
+
+        }
+        generatePitchAccentSVG();
+
+        // --- (NEW) Sentence Audio Interaction ---
+        const sentenceAudioBtnBack = document.getElementById('play_sentence_audio_btn_back');
+        const sentenceAudioFilename = "{{SentenceAudio}}"; // Re-declare for clarity, scope is local
+        if (sentenceAudioBtnBack && sentenceAudioFilename) {
+            sentenceAudioBtnBack.addEventListener('click', function() {
+                const audio = new Audio(sentenceAudioFilename);
+                audio.play();
+            });
+        }
+
+        // --- [新增] Tags Splitter (标签分割器) ---
+        const rawTagContainer = document.getElementById('tag-container');
+        const displayArea = document.getElementById('tag-display-area');
+
+        if (rawTagContainer && displayArea) {
+            const rawText = rawTagContainer.innerText.trim();
+            if (rawText) {
+                // 按空格分割
+                const tags = rawText.split(/\s+/);
+                let html = '';
+                tags.forEach(tag => {
+                    // 生成独立的小标签
+                    html += `<span class="tag-anki">${tag}</span>`;
+                });
+                displayArea.innerHTML = html;
+            }
+        }
+
+    }, 0);
+</script>

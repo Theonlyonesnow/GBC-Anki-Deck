@@ -1,0 +1,49 @@
+<!-- Listening Card - Front Template (Final Interactive Version) -->
+
+<div id="card" class="front listening-front">
+    <div class="card__section listening-prompt-container">
+        <div class="listening-prompt">
+            結果の出ない努力は<br>ただの言い訳
+        </div>
+    </div>
+
+    <div class="card__section listening-audio-control">
+        {{#SentenceAudio}}
+        <button id="play_sentence_audio_listen" class="audio-button" title="Play sentence audio">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>
+        </button>
+        {{/SentenceAudio}}
+    </div>
+
+    <!-- The hint container is now the clickable trigger -->
+    <div id="hint-trigger-container" class="transparent-sentence-container">
+        <div class="sentence-text-hint">{{Sentence}}</div>
+    </div>
+</div>
+
+<script>
+    setTimeout(function() {
+        // --- 1. Sentence Audio Interaction ---
+        const sentenceAudioBtnListen = document.getElementById('play_sentence_audio_listen');
+        const sentenceAudioFilename = "{{SentenceAudio}}";
+        if (sentenceAudioBtnListen && sentenceAudioFilename) {
+            sentenceAudioBtnListen.addEventListener('click', function() {
+                const audio = new Audio(sentenceAudioFilename);
+                audio.play();
+            });
+
+            // Auto-play on card front
+            // Uncomment the line below if you want audio to play automatically
+            sentenceAudioBtnListen.click();
+        }
+
+        // --- 2. (NEW) Hint Toggle Interaction ---
+        const hintContainer = document.getElementById('hint-trigger-container');
+        if (hintContainer) {
+            hintContainer.addEventListener('click', function() {
+                // Toggle the 'is-visible' class on the container
+                hintContainer.classList.toggle('is-visible');
+            });
+        }
+    }, 0);
+</script>

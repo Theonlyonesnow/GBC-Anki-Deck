@@ -1,0 +1,388 @@
+/* GBC Anki Template - Final Fluid Version */
+
+/* --- Part 1: Global Design Tokens (The Foundation) --- */
+:root {
+    /* --- Colors --- */
+    --c-text: #E0E0E0;
+    --c-text-subtle: #9E9E9E;
+    --c-bg: #212121;
+    --c-bg-alt: #303030;
+    --c-border: #424242;
+    --c-accent: #82AAFF;
+    --c-cloze: #FFCB6B;
+    --c-pitch-line: #F07178;
+
+    /* --- Fonts --- */
+    --font-main: system-ui, 'Hiragino Sans', 'Yu Gothic Medium', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+    --font-reading: 'Meiryo', 'Hiragino Sans', 'Microsoft YaHei', sans-serif;
+
+    /* --- Fluid Size System (The Core Logic) --- */
+    --fluid-unit: clamp(0.8rem, 2vw + 0.1rem, 1.2rem); /* Base unit scales with viewport width */
+
+    /* Font Sizes (derived from the base unit) */
+    --font-size-xs:   calc(var(--fluid-unit) * 0.9);   /* Tags */
+    --font-size-s:    calc(var(--fluid-unit) * 1);     /* Body, Meaning */
+    --font-size-m:    calc(var(--fluid-unit) * 1.6);   /* Sentence */
+    --font-size-l:    calc(var(--fluid-unit) * 1.8);   /* Pitch Accent Kana */
+    --font-size-xl:   calc(var(--fluid-unit) * 2.5);   /* Main Expression */
+
+    /* Spacing (derived from the base unit) */
+    --spacing-xs: calc(var(--fluid-unit) * 0.25);
+    --spacing-s:  calc(var(--fluid-unit) * 0.5);
+    --spacing-m:  calc(var(--fluid-unit) * 1);
+    --spacing-l:  calc(var(--fluid-unit) * 1.5);
+    --spacing-xl: calc(var(--fluid-unit) * 2);
+
+    /* --- Other --- */
+    --border-radius: var(--spacing-s);
+}
+
+/* --- Part 2: Global Styles & Layouts (Applying Tokens) --- */
+.nightMode {}
+html, body { background-color: var(--c-bg); }
+
+#card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Change 'center' to 'flex-start' */
+    gap: var(--spacing-l);
+    padding: var(--spacing-m); /* Slightly increase padding for better breathing room */
+    font-family: var(--font-main);
+    color: var(--c-text);
+    background-color: var(--c-bg);
+    min-height: 95vh;
+}
+
+.card__section {
+    background-color: var(--c-bg-alt);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-l);
+    border: 1px solid var(--c-border);
+}
+
+.section-divider {
+    border: none;
+    border-top: 1px solid var(--c-border);
+    margin: 0;
+}
+
+/* --- Video, Sentence, Audio --- */
+.video-player {
+    width: 100%;
+    max-inline-size: 600px; /* 限制最大宽度 */
+    display: block;
+    margin: 0 auto; /* 居中 */
+    border-radius: var(--border-radius);
+}
+
+.video-container {
+    text-align: center; /* 确保视频在容器内居中 */
+    padding: var(--spacing-s); /* 视频容器稍微紧凑一点 */
+}
+
+/* --- Sentence Area --- */
+.sentence-container {
+    text-align: center;
+}
+
+.sentence {
+    font-size: var(--font-size-m);
+    line-height: 2.2;
+}
+
+.sentence-meaning {
+    margin-top: var(--spacing-m);
+    font-size: var(--font-size-s);
+    color: var(--c-text-subtle);
+    border-top: 1px dashed var(--c-border);
+    padding-top: var(--spacing-m);
+}
+
+.cloze-placeholder {
+    color: var(--c-cloze);
+    font-weight: bold;
+    background-color: color-mix(in srgb, var(--c-cloze) 20%, transparent);padding: 0.1em 0.4em;
+    border-radius: 4px;
+}
+
+ruby {
+    margin: 0 0.1em;
+}
+
+
+/* --- Expression Details (Old Styles, will be refactored in Step 3) --- */
+.expression-details { padding: var(--spacing-xl); }
+.expression-header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--c-border); padding-bottom: var(--spacing-m); margin-bottom: var(--spacing-l); }
+.expression-title-group { display: flex; align-items: center; gap: var(--spacing-m); }
+.expression-main { font-size: var(--font-size-xl); font-weight: bold; margin: 0; }
+.audio-button { background: none; border: none; padding: var(--spacing-s); cursor: pointer; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; transition: background-color 0.2s ease; }
+.audio-button svg { fill: var(--c-text-subtle); transition: fill 0.2s ease; width: var(--font-size-l); height: var(--font-size-l); }
+.audio-button:hover { background-color: var(--c-border); }
+.audio-button:hover svg { fill: var(--c-text); }
+.expression-meta { display: flex; align-items: center; gap: var(--spacing-s); }
+.tag-anki { font-size: var(--font-size-xs); padding: 0.3em 0.8em; background-color: var(--c-accent); color: var(--c-bg); font-weight: bold; border-radius: var(--border-radius); }
+.tag-freq { font-size: var(--font-size-xs); padding: 0.3em 0.8em; background-color: var(--c-border); border-radius: var(--border-radius); color: var(--c-text-subtle); }
+.meaning-container { margin-top: var(--spacing-l); font-size: var(--font-size-s); }
+.reading-pitch-container { /* This will be completely rewritten in Step 3 */ }
+
+
+
+/* --- Part 3: Final Ladder Layout & SVG Styles --- */
+
+/* The new header container - this is the Flexbox parent */
+.expression-header-ladder {
+    display: flex;
+    align-items: flex-end; /* KEY: Bottom alignment */
+    gap: var(--spacing-l);
+    flex-wrap: wrap; /* Allow wrapping on small screens */
+    border-bottom: 1px solid var(--c-border);
+    padding-bottom: var(--spacing-m);
+    margin-bottom: var(--spacing-l);
+}
+
+/* Individual items in the ladder */
+.ladder-item {
+    /* Base styles for all items */
+}
+
+/* Item 1: The main expression */
+.ladder-item__expression {
+    display: flex;
+    align-items: center; /* Vertically align expression and audio button */
+    gap: var(--spacing-s);
+    /* Let it take up as much space as needed, but not shrink */
+    flex: 1 1 auto;
+}
+.expression-main {
+    line-height: 1; /* Tighter line height for better alignment */
+}
+
+/* Item 2: The pitch accent SVG */
+.ladder-item__pitch {
+    /* Let it shrink but not grow */
+    flex: 0 1 auto;
+    /* Add some bottom margin to perfectly align the kana baseline with the main expression baseline */
+    margin-bottom: calc(var(--font-size-xl) * 0.1);
+}
+
+/* Item 3: The metadata tags */
+.ladder-item__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-s);
+    flex-shrink: 0; /* Prevent tags from shrinking */
+    /* Add some bottom margin to align with baselines */
+    margin-bottom: calc(var(--font-size-xl) * 0.12);
+}
+
+/* Overwrite old styles that are no longer needed */
+.expression-header, .reading-pitch-container {
+    display: none; /* Hide old containers */
+}
+.meaning-container {
+    margin-top: 0; /* Meaning container is now a direct child */
+}
+
+/* --- Final Tuning: Adjust spacing for the ladder layout --- */
+
+.ladder-item__pitch {
+    /* Use a negative left margin to pull the pitch accent closer to the expression */
+    margin-left: calc(var(--spacing-l) * -0.5); /* Pull it left by half of the gap space */
+}
+
+/* --- Unified Audio Button Styles --- */
+
+/* We can reuse the .audio-button class for the sentence audio button.
+    Its styles for hover effects, etc., are already defined globally.
+    We might want to make it slightly larger for sentences. */
+.sentence-audio-wrapper .audio-button {
+    /* Optional: make the sentence audio button a bit bigger */
+    transform: scale(1.2);
+}
+
+/* --- Inline Sentence Audio Button Layout --- */
+
+.sentence-with-audio {
+    /* This is the new Flexbox parent */
+    display: flex;
+    align-items: center; /* KEY: Vertically align button and text */
+    justify-content: center; /* Center the whole group */
+    gap: var(--spacing-m); /* Space between button and sentence */
+    flex-direction: row-reverse; /* The magic happens here */
+}
+
+.sentence {
+    /* The sentence text itself */
+    text-align: left; /* Align text to the left within its own box */
+}
+
+.sentence-audio-button {
+    /* Make the button shrink-proof so it doesn't get squashed */
+    flex-shrink: 0;
+}
+
+
+/* --- Listening Card Specific Styles --- */
+
+.listening-front .listening-prompt-container {
+    background: none;
+    border: none;
+    text-align: center;
+    padding: 0;
+}
+.listening-front .listening-prompt {
+    font-size: var(--font-size-m);
+    color: var(--c-text-subtle);
+    font-style: italic;
+    line-height: 1.5;
+}
+
+.listening-front .listening-audio-control {
+    background: none;
+    border: none;
+    display: flex;
+    justify-content: center;
+    padding: var(--spacing-l) 0;
+}
+.listening-front .listening-audio-control .audio-button {
+    /* Make the main button very large */
+    transform: scale(2.5);
+}
+.listening-front .listening-audio-control .audio-button:hover {
+    transform: scale(2.8);
+    transition: transform 0.2s ease;
+}
+
+.transparent-sentence-container {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    text-align: center;
+}
+.sentence-text-hint {
+    font-size: var(--font-size-s);
+    color: transparent; /* KEY: This makes the text invisible */
+    text-shadow: none; /* Ensure no shadow makes it visible */
+    user-select: none; /* User cannot select the invisible text */
+}
+
+/* --- Final Listening Card Front Styles --- */
+
+/* --- 1. Proverb/Motto Styling (All effects combined) --- */
+.listening-front .listening-prompt-container {
+    position: relative; /* Needed for the decorative lines */
+    padding-top: var(--spacing-m);
+    padding-bottom: var(--spacing-m);
+}
+
+.listening-front .listening-prompt {
+    /* Scheme 1: Typography */
+    font-family: 'Yu Mincho', 'Hiragino Mincho ProN', serif;
+
+    /* Scheme 3: Layout & Spacing */
+    letter-spacing: 0.1em; /* Increased letter spacing */
+    line-height: 1.8;
+
+    /* Scheme 2B: Gradient Text */
+    background: linear-gradient(180deg, var(--c-text-subtle), #424242);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent; /* Fallback for gradient */
+    -webkit-text-fill-color: transparent;
+    font-style: normal; /* Override the old italic style */
+}
+
+/* Scheme 2A: Decorative Lines */
+.listening-front .listening-prompt::before,
+.listening-front .listening-prompt::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30%; /* Width of the lines */
+    height: 1px;
+    background-color: var(--c-border);
+}
+.listening-front .listening-prompt::before {
+    top: 0; /* Position the top line */
+}
+.listening-front .listening-prompt::after {
+    bottom: 0; /* Position the bottom line */
+}
+
+
+/* --- 2. Hint Visibility Toggle Styling --- */
+#hint-trigger-container {
+    cursor: pointer; /* Change cursor to a pointer to indicate it's clickable */
+}
+
+.sentence-text-hint {
+    transition: color 0.3s ease; /* Smooth transition for visibility */
+}
+
+/* The state when the hint is visible */
+#hint-trigger-container.is-visible .sentence-text-hint {
+    color: var(--c-text-subtle); /* Make the text visible */
+}
+
+
+/* --- 1. 全局粗体重置 (让【用法】回归正常) --- */
+b, strong {
+    color: inherit; /* 跟随周围文字颜色 */
+    font-weight: bold;
+    text-decoration: none;
+}
+
+/* --- 2. 仅针对句子的语法高亮 (Targeted Highlighting) --- */
+.sentence b, .sentence strong {
+    color: #FF9800; /* 橙色 */
+    font-weight: 900;
+    text-decoration: underline;
+    text-decoration-color: rgba(255, 152, 0, 0.3);
+    padding: 0 2px; /* 稍微加点间距，更透气 */
+}
+
+
+/* --- 新的元数据行样式 --- */
+.meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-s);
+    align-items: center;
+    justify-content: center; /* 居中显示，如果要左对齐改为 flex-start */
+    margin-top: var(--spacing-xs); /* 离单词近一点 */
+    margin-bottom: var(--spacing-m);
+}
+
+/* 标签样式优化 */
+.tag-anki {
+    font-size: var(--font-size-xs);
+    padding: 0.2em 0.6em;
+    background-color: var(--c-bg-alt); /* 改淡一点的背景 */
+    border: 1px solid var(--c-accent);
+    color: var(--c-accent);
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+/* 频率样式 */
+.tag-freq {
+    font-size: var(--font-size-xs);
+    padding: 0.2em 0.6em;
+    background-color: var(--c-border);
+    border-radius: 4px;
+    color: var(--c-text-subtle);
+}
+
+/* Note 样式 */
+.sentence-note {
+    margin-top: var(--spacing-s);
+    font-size: var(--font-size-s);
+    color: var(--c-accent);
+    background-color: rgba(130, 170, 255, 0.1); /* 淡淡的蓝色背景 */
+    padding: 5px 10px;
+    border-radius: 4px;
+    border-left: 3px solid var(--c-accent);
+    text-align: left; /* Note 通常较长，左对齐更好读 */
+}
